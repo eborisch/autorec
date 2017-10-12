@@ -99,3 +99,19 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# SSH key
+id_recon
+
+# Local config
+ar_lib/site-*.py
+
+# DICOM files
+*/*.sdcopen
+
+# Script log dirs
+*/logs
+
+# vim droppings
+*.py~
+*.py.swp

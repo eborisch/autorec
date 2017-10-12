@@ -1,0 +1,18 @@
+#!/bin/bash
+# Wrapper to discard "FIPS mode initialized" lines
+
+#Duplicate (save) actual stderr
+exec 3>&2
+
+# Redirect "our" stderr into egrep (which then redirects the filtered output
+# into the actual stderr; close extra descriptors for good measure)
+exec 2> >(egrep -v --line-buffered "^FIPS mode initialized" \
+          1>&3 \
+          3>&- \
+          2>/dev/null)
+
+# Close duplicate stderr
+exec 3>&-
+
+# Launch ssh. Lines on stderr that begin with "FIPS mode" are discarded.
+exec ssh "$@"

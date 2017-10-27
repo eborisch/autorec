@@ -14,7 +14,7 @@ Installation:
     ```
     Hit return without entering a password (twice).
  *  Copy the created id_recon.pub into your reconstruction user's
-    `~/.ssh/authorized_keys` (`~/.ssh` and `~/.ssh/authorized` keys must not be
+    `~/.ssh/authorized_keys` (`~/.ssh` and `~/.ssh/authorized_keys` must not be
     world read/writeable) on DEFAULT_RECON_MACHINES[0]. (Assuming it connects, it
     will attempt DEFAULT_RECON_MACHINES[1] ... if provided and [0] fails.)
  *  Execute AR_PATH/ar_lib/ssh.py to test SSH connectivity.

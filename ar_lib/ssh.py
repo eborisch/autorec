@@ -65,6 +65,8 @@ class SSH(object):
         self._init = True
         if conf is None:
             self._conf = '/dev/null'
+        else:
+            self._conf = conf
 
         if DEBUG:
             print("Launching master session. "
@@ -316,7 +318,7 @@ if __name__ == '__main__':
     # loaded module here.
     import sys
     sys.path.insert(0, dirname(ssh_dir))
-    from ar_lib.site import USERNAME, DEFAULT_RECON_MACHINES
+    from ar_lib.site import USERNAME, DEFAULT_RECON_MACHINES, SSH_CONF
     from ar_lib.JobManager import KEYFILE
 
     def _pstree():
@@ -336,8 +338,8 @@ if __name__ == '__main__':
     else:
         host = DEFAULT_RECON_MACHINES[0]
 
-    sess = SSH(host, USERNAME, KEYFILE)
-    sess = SSH(host, USERNAME, KEYFILE)
+    sess = SSH(host, USERNAME, KEYFILE, conf=SSH_CONF)
+    sess = SSH(host, USERNAME, KEYFILE, conf=SSH_CONF)
 
     test = sess.run('sleep 1', stdout=None)
     _pstree()
@@ -375,7 +377,7 @@ if __name__ == '__main__':
 
     _pstree()
     print('Timings with ./ssh_wrapper:')
-    sess = SSH(host, USERNAME, KEYFILE,
+    sess = SSH(host, USERNAME, KEYFILE, conf=SSH_CONF,
                executable=os.path.join(ssh_dir, 'ssh_wrapper'))
     _pstree()
 
@@ -390,4 +392,4 @@ if __name__ == '__main__':
 
     _pstree()
 
-    #sf = SFTP(host, USERNAME, KEYFILE)
+    #sf = SFTP(host, USERNAME, KEYFILE, conf=SSH_CONF)

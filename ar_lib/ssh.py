@@ -48,7 +48,7 @@ class SSH(object):
     Object to handle an active (kept open with a control master connection) SSH
     session providing rapid (~ 30/s) execution of remote tasks.
     """
-    def __init__(self, hostname, username, key, executable='ssh'):
+    def __init__(self, hostname, username, key, executable='ssh', conf=None):
         """
         Initialize session. Raises IOError if unable to connect.
 
@@ -63,6 +63,8 @@ class SSH(object):
         self._key = key
         self._exe = executable
         self._init = True
+        if conf is None:
+            self._conf = '/dev/null'
 
         if DEBUG:
             print("Launching master session. "
@@ -243,7 +245,7 @@ class SSH(object):
         # our ssh_wrapper script discards "FIPS mode initialized" messages on
         # stderr.
         cmd = (self._exe,
-               "-F", "/dev/null",
+               "-F", self._conf,
                "-o", "IdentityFile={0}".format(self._key),
                "-o", "BatchMode=yes",
                "-o", "ConnectTimeout=5",

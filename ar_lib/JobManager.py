@@ -52,6 +52,7 @@ from .site import \
         KEYFILE, \
         MAX_PUSH_TIME, \
         SOFT_RETRIES, \
+        SSH_CONF, \
         USERNAME
 
 # Set RT_DEBUG to something other than '0' for debug mode.
@@ -950,7 +951,11 @@ class JobManager(object):
         self.machine_name = None
         for m in machines:
             try:
-                self.S = ssh.SSH(m, user, keyfile, executable=SSH_EXE)
+                self.S = ssh.SSH(m,
+                                 user,
+                                 keyfile,
+                                 executable=SSH_EXE,
+                                 conf=SSH_CONF)
             except Exception as e:
                 print("Unable to connect to machine %s [%s] "
                       "trying next connection." % (m, str(e)))

@@ -85,6 +85,9 @@ USERNAME = 'autorec'
 # directory as the top-level autorec.py script.
 KEYFILE = None
 
+# Path to SSH configuration file to use. [Optional]
+SSH_CONF = None
+
 # Contact info to record in logs if there is an error.
 CONTACT = 'system administrator'
 

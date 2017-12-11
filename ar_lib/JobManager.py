@@ -850,6 +850,9 @@ class JobManager(object):
             # Process in parts; minimum of 256 at a time
             step = max(len(fNames)//8, 256)
 
+        # Only really matters for progress printout...
+        step = min(step, len(fNames))
+
         for i in range(0, len(fNames), step):
             try:
                 totalSize += self._get_files(fNames[i:i+step])

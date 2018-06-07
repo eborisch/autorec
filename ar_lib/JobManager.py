@@ -958,7 +958,7 @@ class JobManager(object):
                                  user,
                                  keyfile,
                                  executable=SSH_EXE,
-                                 conf=SSH_CONF)
+                                 standalone=SSH_CONF)
             except Exception as e:
                 print("Unable to connect to machine %s [%s] "
                       "trying next connection." % (m, str(e)))

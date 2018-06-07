@@ -93,5 +93,6 @@ CONTACT = 'system administrator'
 
 
 # You can also add site-specific config in site-*.py files next to this one.
-for _lclfile in _glob(_path.join(_path.dirname(__file__), 'site-*.py')):
-    execfile(_lclfile) # IF ERRORING HERE, CHECK YOUR site-*.py FILES!
+for _site_local in _glob(_path.join(_path.dirname(__file__), 'site-*.py')):
+    with open(_site_local, 'r') as _site_conf:
+        exec(compile(_site_conf.read(), _site_local, 'exec'))

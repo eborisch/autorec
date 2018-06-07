@@ -79,8 +79,8 @@ class SSH(object):
          key: path to SSH key file
          executable: SSH executable to call
          standalone: True:       use /dev/null
-                     String:     use as standaloneig file
-                     Otherwise:  use normal ~/.ssh/standaloneig
+                     String:     use as config file
+                     Otherwise:  use normal ~/.ssh/config
         """
         self._hostname = hostname
         self._username = username

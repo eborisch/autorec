@@ -50,12 +50,12 @@ tokenName = None
 # Modify and add others as needed.
 cpth = os.path.join(MOD_DIR, 'connectionTest')
 
-settleFile(os.path.join(cpth,'conf.py'))
+settle_file(os.path.join(cpth,'conf.py'))
 
 sendFiles = {}
 for x in ('conf.py', 'pre.py', 'post.py', 'raw', 'test_file'):
   _pth = os.path.join(cpth, x)
-  settleFile(_pth)
+  settle_file(_pth)
   sendFiles[_pth] = (x, False, False)
 
 getMip = False

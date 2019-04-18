@@ -291,6 +291,7 @@ print("\nSubmission complete: %s\n" % now().ctime())
 if tokenName:
     start_time = time.time()
     if opt_value['isolate']:
+        #NOTE: This will cd into 'latest' on the remote side during call.
         MGR.start_and_wait_job(tokenName, "latest")
     else:
         MGR.start_and_wait_job(tokenName)
@@ -298,9 +299,6 @@ if tokenName:
     print("Reconstruction time (including checksum): %ds\n" % int(job_time))
 else:
     print("No reconstruction requested.")
-
-if opt_value['isolate']:
-    MGR.enter_dir('latest')
 
 ##############################################################################
 ## Run post.py (if it exists) ################################################

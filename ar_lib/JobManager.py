@@ -1051,6 +1051,8 @@ class JobManager(object):
         """
         Kicks off reconstruction (by placing the tokenName file)
         and waits for completion.
+        If outdir is provided, look for completion tokens in outdir. Will
+        be in outdir after returning from call.
         """
 
         # Early exit if no job name (no job to run)
@@ -1088,11 +1090,11 @@ class JobManager(object):
 
         print("Sending files complete; wating for checksum...")
 
-        md5_done = ppath.join(outdir, "md5_done")
-        done = ppath.join(outdir, "done")
 
-        self.wait_file(md5_done)
-        self.remove_file(md5_done)
+        self.wait_file(ppath.join(outdir, "md5_done"))
+        if outdir:
+            self.enter_dir(outdir, create_dir=False)
+        self.remove_file("md5_done")
 
         print(dedent(
               """
@@ -1104,9 +1106,9 @@ class JobManager(object):
               ---------------
               """))
 
-        self.wait_file(done, 3600)
+        self.wait_file("done", 3600)
         # Remove "done" file from server
-        self.remove_file(done)
+        self.remove_file("done")
 
     def store_file(self, local_path, remote_name, quiet=False, md5Map=None):
         """

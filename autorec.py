@@ -182,6 +182,7 @@ locally for safe keeping before exiting.
 #  copy to work/log dir (bool),
 #  delete after recon (bool))
 
+sendFiles = {}
 reconVars = locals().copy()
 # We already checked for existence
 try:
@@ -209,6 +210,9 @@ except Exception as e:
 jobsDir = reconVars['jobsDir']
 tokenName = reconVars['tokenName']
 sendFiles = reconVars['sendFiles']
+
+if len(sendFiles) == 0:
+    raise ValueError("No send files were defined!")
 
 # Default values for optional variable
 opt_value = {'mipCopy': None,

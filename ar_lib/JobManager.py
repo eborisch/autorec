@@ -53,7 +53,8 @@ from .site import \
         MAX_PUSH_TIME, \
         SOFT_RETRIES, \
         SSH_CONF, \
-        USERNAME
+        USERNAME, \
+        EXPORT_PATH
 
 # Set RT_DEBUG to something other than '0' for debug mode.
 DEBUG = os.environ.get('RT_DEBUG', '0') != '0'
@@ -148,7 +149,7 @@ class JobManager(object):
             DISABLE_PUSH = os.environ['DISABLE_PUSH'] == '1'
         except KeyError:
             DISABLE_PUSH = False
-        EXPORT_PATH = './'
+        export_path = './'
     else:
         # Linux MRI host settings. Use our compiled dicom/storescu from dcmtk
         DCM_DIR = os.path.join(MOD_DIR, "dicom")
@@ -156,7 +157,13 @@ class JobManager(object):
 
         # If this file exists, don't push outside of localhost
         DISABLE_PUSH = os.path.exists(os.path.join(MOD_DIR, 'dcm.hold'))
-        EXPORT_PATH = '/export/home1/sdc_image_pool/import/'
+        if EXPORT_PATH is None:
+            export_path = '/export/home1/sdc_image_pool/import/'
+        else:
+            export_path = EXPORT_PATH
+
+    if export_path[-1] != '/':
+        export_path = export_path + '/'
 
     __TMP = (os.path.join(DCM_DIR, "storescu"),
              "--call {aet}",
@@ -329,7 +336,7 @@ class JobManager(object):
     @staticmethod
     def import_dir_name(dir_name):
         "Returns the the full path for the import directory dir_name identifies"
-        return os.path.join(JobManager.EXPORT_PATH,
+        return os.path.join(JobManager.export_path,
                             dir_name + JobManager.dir_suffix())
 
     @staticmethod
@@ -737,11 +744,18 @@ class JobManager(object):
                 return sz
 
         rTarCmd = "tar -C '{0}' -vcf- '{1}' "\
-                  "| pigz -1".format(self.cwd, "' '".join(file_list))
+                  "| gzip -1".format(self.cwd, "' '".join(file_list))
         cCmd = shlex.split('sh -c "gzip -qd | dd bs=4k"')
         lTarCmd = ('tar', '-vxf-')
 
+
+
         files = [os.tmpfile(), os.tmpfile(), os.tmpfile()]
+
+        if DEBUG:
+            print("Remote command: " + rTarCmd)
+            print("local decompress and count: " + ' '.join(cCmd))
+            print("Untar command: " + ' '.join(lTarCmd))
 
         cmds = [None] * 3
         cmds[0] = self.S.run(rTarCmd,
@@ -772,6 +786,11 @@ class JobManager(object):
                     raise subprocess.CalledProcessError(
                             cmds[n].returncode,
                             "Error during _get_files() cmds[{0}].".format(n))
+        if DEBUG:
+            for f in files:
+                f.seek(0)
+                print("---")
+                print(f.read())
 
         files[1].seek(0)
         for l in files[1]:
@@ -1000,7 +1019,7 @@ class JobManager(object):
         # Actually receive into the level above EXPORT_PATH to avoid having GE
         # delete the directory while we try to recieve into it
         retrieveTmp = \
-          os.path.join(os.path.dirname(JobManager.EXPORT_PATH),
+          os.path.join(os.path.dirname(JobManager.export_path),
                        "mar_tmp_" + dir_name + JobManager.dir_suffix())
         os.mkdir(retrieveTmp)
         os.chdir(retrieveTmp)
@@ -1266,3 +1285,5 @@ class JobManager(object):
                          """).format(file_name))
             raise self.SessionError("File never appeared [{0}]!"
                                     .format(file_name))
+
+# vim: ts=4:sw=4:et

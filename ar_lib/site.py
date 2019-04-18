@@ -91,6 +91,10 @@ SSH_CONF = None
 # Contact info to record in logs if there is an error.
 CONTACT = 'system administrator'
 
+# Directory for retrieving images into (temporarily); Uses an internal default
+# if NONE
+EXPORT_PATH = None
+
 
 # You can also add site-specific config in site-*.py files next to this one.
 for _site_local in _glob(_path.join(_path.dirname(__file__), 'site-*.py')):

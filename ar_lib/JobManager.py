@@ -74,7 +74,7 @@ if not os.path.exists(KEYFILE):
     exit(1)
 
 
-def remote_file(name, copy=False, delete=True):
+def remote_file(name, copy=False, delete=False):
     "Helper function for building remote file desciption tuples."
     if not (isinstance(copy, bool) and isinstance(copy, bool)):
         raise ValueError("'copy' and 'delete' must be booleans.")

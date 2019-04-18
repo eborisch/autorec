@@ -21,6 +21,7 @@
 #    import = Perform local imports (overrides pushImport when False) [True]
 #    pushDests = DicomDest (or iterable of) object[s] of additional dests.
 #    pushImport = Perform a local push into scanner database [True]
+#    isolate = Remote reconstruction is configured in isolate mode [False]
 ##########################################################################
 #
 # Some useful variables defined on entry by autorec:

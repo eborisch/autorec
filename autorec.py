@@ -221,7 +221,8 @@ opt_value = {'mipCopy': None,
              'getImg': True,
              'pushDests': None,
              'pushImport': True,
-             'import': True}
+             'import': True,
+             'isolate': False}
 
 # Copy any optional variables that were set
 for n in opt_value:
@@ -289,11 +290,17 @@ print("\nSubmission complete: %s\n" % now().ctime())
 ###############
 if tokenName:
     start_time = time.time()
-    MGR.start_and_wait_job(tokenName)
+    if opt_value['isolate']:
+        MGR.start_and_wait_job(tokenName, "latest")
+    else:
+        MGR.start_and_wait_job(tokenName)
     job_time = time.time() - start_time
     print("Reconstruction time (including checksum): %ds\n" % int(job_time))
 else:
     print("No reconstruction requested.")
+
+if opt_value['isolate']:
+    MGR.enter_dir('latest')
 
 ##############################################################################
 ## Run post.py (if it exists) ################################################

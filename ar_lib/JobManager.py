@@ -1047,7 +1047,7 @@ class JobManager(object):
         retrieveDest = JobManager.import_dir_name(dir_name)
         shutil.move(retrieveTmp, retrieveDest)
 
-    def start_and_wait_job(self, token_name_in):
+    def start_and_wait_job(self, token_name_in, outdir=""):
         """
         Kicks off reconstruction (by placing the tokenName file)
         and waits for completion.
@@ -1088,8 +1088,11 @@ class JobManager(object):
 
         print("Sending files complete; wating for checksum...")
 
-        self.wait_file("md5_done")
-        self.remove_file("md5_done")
+        md5_done = ppath.join(outdir, "md5_done")
+        done = ppath.join(outdir, "done")
+
+        self.wait_file(md5_done)
+        self.remove_file(md5_done)
 
         print(dedent(
               """
@@ -1101,9 +1104,9 @@ class JobManager(object):
               ---------------
               """))
 
-        self.wait_file("done", 3600)
+        self.wait_file(done, 3600)
         # Remove "done" file from server
-        self.remove_file("done")
+        self.remove_file(done)
 
     def store_file(self, local_path, remote_name, quiet=False, md5Map=None):
         """

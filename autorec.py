@@ -37,7 +37,8 @@ import posixpath as ppath
 from ar_lib.JobManager import \
         JobManager, \
         GetFilesCallback, \
-        MOD_DIR
+        MOD_DIR, \
+        remote_file
 from ar_lib.dicom import DicomDest
 from ar_lib.tee import Tee
 # run_cmd is imported to be available in conf.py executions.
@@ -211,11 +212,12 @@ sendFiles = reconVars['sendFiles']
 
 # Default values for optional variable
 opt_value = {'mipCopy': None,
-            'imgCopy': None,
-            'getMip': True,
-            'getImg': True,
-            'pushDests': None,
-            'pushImport': True}
+             'imgCopy': None,
+             'getMip': False,
+             'getImg': True,
+             'pushDests': None,
+             'pushImport': True,
+             'import': True}
 
 # Copy any optional variables that were set
 for n in opt_value:
@@ -308,7 +310,7 @@ for dir_name in ('mip', 'img'):
         continue
 
     pusher = None  # By default say we have not yet locally pushed.
-    if opt_value['pushImport']:
+    if opt_value['import'] and opt_value['pushImport']:
         # This sets up a callback used during retreiveDir() below. It attempts
         # to perform a local dicom push into the scanner database after every
         # 5 seconds or 512 files retrieved, whichever comes first.
@@ -333,6 +335,11 @@ for dir_name in ('mip', 'img'):
         print("Error pushing to:{0}".format(opt_value['pushDests']))
         print("Continuing.")
 
+    # We don't need the remainder of this loop if we're not importing. The
+    # retrieved files will be left on the local filesystem.
+    if not opt_value['import']:
+        continue
+
     if opt_value['pushImport'] and pusher.complete is True:
         # Requested pushImport above worked; we're done here
         print("Successful import. Removing source directory.")
@@ -343,7 +350,7 @@ for dir_name in ('mip', 'img'):
                   .format(JobManager.import_dir_name(dir_name)))
     else:
         # Either we were told not to pushImport, or it failed.  Perform a
-        # "Traditional" import
+        # "Traditional" import. Note the directory is removed in this process.
         MGR.import_dir(dir_name)
 
 ################################################

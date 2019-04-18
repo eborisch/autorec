@@ -13,11 +13,14 @@
 #    tokenName  = name of the file created in jobsDir to kickoff recon
 #    sendFiles  = Dictionary of files to send.
 #
-# OPTIONAL:
-#    mipCopy = Additional directory to copy resulting MIP DICOMs into
+# OPTIONAL: [default when != None]
+#    getImg = Retrieve and import "img" directory [True]
+#    getMip = Retrieve and import "mip" directory [False]
 #    imgCopy = Additional directory to copy resulting image DICOMs into
-#    getMip = Retrieve and import "mip" directory (defaults to true)
-#    getImg = Retrieve and import "img" directory (defaults to true)
+#    mipCopy = Additional directory to copy resulting MIP DICOMs into
+#    import = Perform local imports (overrides pushImport when False) [True]
+#    pushDests = DicomDest (or iterable of) object[s] of additional dests.
+#    pushImport = Perform a local push into scanner database [True]
 ##########################################################################
 #
 # Some useful variables defined on entry by autorec:
@@ -40,28 +43,34 @@ jobsDir = '/incoming/RECONNAME'
 # Change KEY to the name of the token file recwatch is expecting
 tokenName = 'KEY'
 
-# The sendFiles variable is a dictionary; the keys are the local (absolute)
-# paths to files for sending, and the values are a tuple of:
-#  (relative remote name, copy to log dir (bool), delete after recon (bool))
+# The sendFiles variable is a dictionary; the keys are the local **absolute**
+# paths to files for sending, and the values are created with remote_file():
 #
-# See also:
-#  http://docs.python.org/tutorial/datastructures.html#dictionaries
-#  http://docs.python.org/tutorial/datastructures.html#tuples-and-sequences
+#   remote_file(name, copy=False, delete=False)
+#     name:     relative name in remote work directory (string)
+#     copy:     copy the local file into logging directory (boolean)
+#     delete:   delete local after successful completion. NOTE: Deletes only
+#               the copy if copy=True; otherwise deletes the source. (boolean)
+#
+# For example, this:
+#
+#     sendFiles['/tmp/info-file'] = remote_file('info', delete=True)
+#
+# will copy '/tmp/info-file' into the remote work directory as 'info' and
+# delete the local (/tmp/info-file) on successful completion.
 #
 # This line copies the p-file from the current EXAM (set in PFILE_N) as
 # P_FILE_<EXAM>S<SERIES>_<YYYY_MM_DD>.7 in the destination job directory.
 #
 # Modify and add others as needed.
 
-sendFiles = {'/usr/g/mrraw/P%05d.7' % PFILE_N : 
-    ('P_FILE_%dS%d_%s.7' % (EXAM, SERIES, SHORT_DATE), False, False)}
+sendFiles['/usr/g/mrraw/P%05d.7' % PFILE_N] = \
+    remote_file('P_FILE_%dS%d_%s.7' % (EXAM, SERIES, SHORT_DATE))
 
-# Annotated version of above:
-# sendFiles = { # Dictionary start
-#  '/usr/g/mrraw/P%05d.7' % PFILE_N : # Dictionary key; local (absolute) path
-#  ( # Tuple start; First dictionary entry value
-#    'P_FILE_%dS%d_%s.7' % (EXAM, SERIES, SHORT_DATE), # (relative) remote name
-#    False, # False = Do not copy to log dir
-#    False  # False = No deletion post completion
-#  ) # Tuple end
-# } # Dictionary end
+# Additional destinations for pushing img and mip directories (if retrieved)
+# can be added by assigning one or more DicomDests to pushDests:
+#
+#    DicomDest constructor: DicomDest(aet, ip, port=4006)
+#
+# pushDests = [DicomDest('archive', '10.0.0.10', 4242),
+#              DicomDest('pacs',    '10.0.0.11')] # Uses default port=4006

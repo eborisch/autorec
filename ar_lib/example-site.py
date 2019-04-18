@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 """
-Copy this file and rename it to side-*.py (where * is something descriptive
+Copy this file and rename it to site-*.py (where * is something descriptive
 for your location. Uncomment and change values as needed.
 """
 

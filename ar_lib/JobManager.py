@@ -47,14 +47,15 @@ from .dicom import DicomDest
 from .util import print_out, pretty_bytes, MD5Wrapper, flatten
 from .site import \
         AE_TITLE, \
+        CONTACT, \
         DEFAULT_RECON_MACHINES, \
+        EXPORT_PATH, \
         HARD_RETRIES, \
         KEYFILE, \
         MAX_PUSH_TIME, \
         SOFT_RETRIES, \
         SSH_CONF, \
-        USERNAME, \
-        EXPORT_PATH
+        USERNAME
 
 # Set RT_DEBUG to something other than '0' for debug mode.
 DEBUG = os.environ.get('RT_DEBUG', '0') != '0'
@@ -1011,7 +1012,7 @@ class JobManager(object):
         md5s = {}
         startTime = time()
 
-        for key in files:
+        for key in sorted(files):
             try:
                 size += self.store_file(key,
                                        files[key][0],
@@ -1090,8 +1091,8 @@ class JobManager(object):
         if rshell.returncode:
             print(dedent("""
                          Waited for file [{0}]; never appeared!
-                         Contact Eric Borisch at (pager) 6-8656 for help.
-                         """).format(file_name))
+                         Contact {1} for help.
+                         """).format(file_name, CONTACT))
             raise self.SessionError("File never appeared [{0}]!"
                                     .format(file_name))
 

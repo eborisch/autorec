@@ -548,6 +548,11 @@ class SFTP():
 
         files = [tempfile.TemporaryFile() for n in range(3)]
 
+        if DEBUG:
+            print("Remote command: " + rem_tar)
+            print("local decompress and count: " + ' '.join(count_cmd))
+            print("Untar command: " + ' '.join(lcl_tar))
+
         cmds = [None] * 3
         cmds[0] = self._ssh.run(rem_tar,
                                 stderr=files[0],
@@ -578,6 +583,12 @@ class SFTP():
                     raise subprocess.CalledProcessError(
                         c.returncode,
                         "Error during _get_files() cmds[{0}].".format(n))
+
+        if DEBUG:
+            for f in files:
+                f.seek(0)
+                print("---")
+                print(f.read())
 
         # Get bytecount from dd
         files[1].seek(0)

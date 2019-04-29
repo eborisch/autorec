@@ -76,12 +76,15 @@ PFILE_N = 0
 EXAM = os.getpid()  # If it's not changed below, make somewhat unique
 SERIES = 0
 
-if len(sys.argv) >= 2:
-    PFILE_N = int(sys.argv[1])
-if len(sys.argv) >= 5:
-    EXAM = int(sys.argv[4])
-if len(sys.argv) >= 6:
-    SERIES = int(sys.argv[5])
+try:
+    if len(sys.argv) >= 2:
+        PFILE_N = int(sys.argv[1])
+    if len(sys.argv) >= 5:
+        EXAM = int(sys.argv[4])
+    if len(sys.argv) >= 6:
+        SERIES = int(sys.argv[5])
+except ValueError:
+    print("Unable to parse args as int()s; continuing...")
 
 HOSTNAME = socket.gethostname().split('.')[0]
 

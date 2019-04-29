@@ -61,6 +61,12 @@ TEST_DIR = "Set to path to .sdcopen files on DEFAULT_RECON_MACHINES."     # |
 # AET for local push operation. If 'None', use first component of hostname
 LOCAL_AET = None
 
+# IP address for the default "local" push destination
+LOCAL_IP = '127.0.0.1'
+
+# TCP Port for the default "local" push destination
+LOCAL_PORT = 4006
+
 # Our AE title used when pushing DICOM images.
 AE_TITLE = 'AUTOREC'
 

@@ -328,7 +328,8 @@ for dir_name in ('mip', 'img'):
         # 5 seconds or 512 files retrieved, whichever comes first.
         pusher = GetFilesCallback(
             lambda x: JobManager.push_files(DicomDest(aet=LOCAL_AET,
-                                                      ip='127.0.0.1'), x),
+                                                      ip=LOCAL_IP,
+                                                      port=LOCAL_PORT), x),
             timeout=5.0,
             limit=512,
             desc='%s push' % LOCAL_AET)

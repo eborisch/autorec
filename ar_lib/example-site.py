@@ -71,3 +71,10 @@ for your location. Uncomment and change values as needed.
 ## Directory for retrieving images into (temporarily); Uses an internal default
 ## if NONE
 #EXPORT_PATH = None
+
+## This must exist on both sides of connection. If you are bandwidth limited
+## (and your output files are compressible) consider upping the compression
+## level.
+#COMPRESS = 'gzip -1'
+#DECOMPRESS = 'gzip -q -d'
+

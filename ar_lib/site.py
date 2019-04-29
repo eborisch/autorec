@@ -95,6 +95,11 @@ CONTACT = 'system administrator'
 # if NONE
 EXPORT_PATH = None
 
+# This must exist on both sides of connection. If you are bandwidth limited
+# (and your output files are compressible) consider upping the compression
+# level.
+COMPRESS = 'gzip -1'
+DECOMPRESS = 'gzip -q -d'
 
 # You can also add site-specific config in site-*.py files next to this one.
 for _site_local in _glob(_path.join(_path.dirname(__file__), 'site-*.py')):

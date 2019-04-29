@@ -38,6 +38,8 @@ import time
 
 from signal import SIGINT, SIGQUIT, SIGKILL
 
+from .site import COMPRESS, DECOMPRESS
+
 DEBUG = os.environ.get('SSH_DEBUG', '0') != '0'
 
 def pretty_bytes(num):
@@ -541,9 +543,11 @@ class SFTP():
 
         dir_xfer = len(file_list) == 1 and file_list[0] in self.dir_names()
 
-        rem_tar = "tar -C '{0}' -vcf- '{1}' "\
-                  "| gzip -1".format(self._get_abs_cwd(), "' '".join(file_list))
-        count_cmd = shlex.split('sh -c "gzip -qd | dd bs=32k"')
+        rem_tar = "tar -C '{0}' -vcf- '{1}' | {2}" \
+                    .format(self._get_abs_cwd(),
+                            "' '".join(file_list),
+                            COMPRESS)
+        count_cmd = shlex.split('sh -c "{0} | dd bs=32k"'.format(DECOMPRESS))
         lcl_tar = ('tar', '-vxf-')
 
         files = [tempfile.TemporaryFile() for n in range(3)]

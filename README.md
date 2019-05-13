@@ -30,3 +30,5 @@ To run automatically after an acquisition:
  *  Note the symlink name is used to determine what directory (and associated
     conf.py file) to use.
  *  Logs are created in AR_PATH/reconNNNN/logs/JOB_DESCRIPTOR/
+
+DOIs for individual releases available at: https://doi.org/10.5281/zenodo.2739230

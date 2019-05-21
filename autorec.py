@@ -32,6 +32,8 @@ import socket
 import sys
 import time
 
+sys.path.append(os.path.join(sys.path[0], 'extern'))
+
 import posixpath as ppath
 
 from ar_lib.JobManager import \

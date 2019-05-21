@@ -1,0 +1,8 @@
+[submodule "private/pydicom"]
+	path = private/pydicom
+	url = https://github.com/pydicom/pydicom
+	branch = 1.2.X
+[submodule "private/pynetdicom"]
+	path = private/pynetdicom
+	url = https://github.com/pydicom/pynetdicom
+	branch = 1.3.X

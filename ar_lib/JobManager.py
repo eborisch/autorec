@@ -57,6 +57,15 @@ from .site import \
         SSH_CONF, \
         USERNAME
 
+try:
+    import pynetdicom
+    from pydicom import dcmread
+    NATIVE_PUSH = True
+except:
+    print("Unable to import pynetdicom")
+    print("Try [git submodule update --init --recursive] in autorec directory."
+    NATIVE_PUSH = False
+
 # Set RT_DEBUG to something other than '0' for debug mode.
 DEBUG = os.environ.get('RT_DEBUG', '0') != '0'
 DARWIN = os.uname()[0] == 'Darwin'
@@ -350,6 +359,47 @@ class JobManager(object):
                             dir_name + JobManager.dir_suffix())
 
     @staticmethod
+    def __push_native(cmd_line, dest):
+        if '--scan-directories' in cmd_line:
+            send_dir = cmd_line.split()[-1]
+            files = []
+            for (dpath, dnames, fnames) in os.walk(send_dir):
+                for f in fnames:
+                    files.append(os.path.join(dpath, f))
+        else:
+            args = cmd_line.split()
+            # Filenames are after the port in the command line
+            files = args[args.index('{0}'.format(dest.port))+1:]
+
+        if not files:
+            print("No files provided to __push_native()!")
+            return ""
+        
+        ae = pynetdicom.AE(ae_title=AE_TITLE)
+        ae.requested_contexts = pynetdicom.StoragePresentationContexts
+        assoc = ae.associate(dest.host, dest.port,
+                             ae_title=dest.aet)
+        if not assoc.is_associated:
+            msg = "Unable to associate with {0}".format(dest)
+            raise JobManager.PushError(msg)
+
+        retval = [''] # Add newlines to this; used to count sent files
+        
+        for f in files:
+            try:
+                ds = dcmread(f)
+                status = assoc.send_c_store(ds)
+                if not status or staus.Status != 0:
+                    raise Exception
+                retval.append('')
+            except:
+                print("Unable to read file in __push_native: {0}".format(f))
+                continue
+            # TODO....
+
+        return '\n'.join(retval)
+
+    @staticmethod
     def __push(cmd_line,
                dest,
                error_message="Pushing DICOM failed in __push!"):
@@ -362,21 +412,32 @@ class JobManager(object):
 
         retries = SOFT_RETRIES
         hard_failure = HARD_RETRIES # Times to retry hard errors
+        native_success = None
 
         while retries > 0:
-            proc = subprocess.Popen(shlex.split(cmd_line.encode('ascii')),
-                                    bufsize=4096,
-                                    close_fds=True,
-                                    stdin=open('/dev/null', 'r'),
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                    universal_newlines=True)
+            if NATIVE_PUSH:
+                native_success = False
+                try:
+                    dcm_sent = JobManager.__push_native(cmd_line, dest)
+                    native_success = True
+                    break
+                except:
+                    # TODO
+                    pass
+            else:
+                proc = subprocess.Popen(shlex.split(cmd_line.encode('ascii')),
+                                        bufsize=4096,
+                                        close_fds=True,
+                                        stdin=open('/dev/null', 'r'),
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE,
+                                        universal_newlines=True)
 
-            # Wait for process to finish
-            (dcm_out, dcm_err) = proc.communicate()
+                # Wait for process to finish
+                (dcm_out, dcm_err) = proc.communicate()
 
-            if proc.returncode == 0:
-                break  # success!
+                if proc.returncode == 0:
+                    break  # success!
 
             if 'Transient' in dcm_err:
                 print("Transient error. Will retry {0} {1} times."
@@ -402,7 +463,7 @@ class JobManager(object):
             break
 
         # Check to see if everything worked
-        if proc.returncode != 0:
+        if native_success is False or proc.returncode != 0:
             with JobManager.PRINT_LOCK:
                 print(" +--- Error during DICOM send. Returned [{0}]"
                       .format(proc.returncode))
@@ -410,7 +471,10 @@ class JobManager(object):
             raise JobManager.PushError(error_message)
 
         # See how many images we transferred.
-        return dcm_out.count('\n')
+        if native_success:
+            return dcm_sent
+        else:
+            return dcm_out.count('\n')
 
     @staticmethod
     def push_files(dest, files):

@@ -61,10 +61,12 @@ try:
     import pynetdicom
     from pydicom import dcmread
     NATIVE_PUSH = True
+    ASSOCS = {}
 except:
     print("Unable to import pynetdicom")
-    print("Try [git submodule update --init --recursive] in autorec directory."
+    print("Try [git submodule update --init --recursive] in autorec dir.")
     NATIVE_PUSH = False
+
 
 # Set RT_DEBUG to something other than '0' for debug mode.
 DEBUG = os.environ.get('RT_DEBUG', '0') != '0'
@@ -377,27 +379,29 @@ class JobManager(object):
         
         ae = pynetdicom.AE(ae_title=AE_TITLE)
         ae.requested_contexts = pynetdicom.StoragePresentationContexts
-        assoc = ae.associate(dest.host, dest.port,
-                             ae_title=dest.aet)
-        if not assoc.is_associated:
-            msg = "Unable to associate with {0}".format(dest)
-            raise JobManager.PushError(msg)
+        if not ASSOCS.has_key(dest):
+            ASSOCS[dest] = ae.associate(dest.ip, dest.port,
+                                        ae_title=dest.aet)
+            if not ASSOCS[dest].is_established:
+                msg = "Unable to associate with {0}".format(dest)
+                ASSOCS.pop(dest)
+                raise JobManager.PushError(msg)
 
-        retval = [''] # Add newlines to this; used to count sent files
-        
+        assoc = ASSOCS[dest]
+
+        sent = 0
         for f in files:
             try:
-                ds = dcmread(f)
-                status = assoc.send_c_store(ds)
-                if not status or staus.Status != 0:
+                status = assoc.send_c_store(dcmread(f), msg_id=sent+1)
+                if not status or status.Status != 0:
                     raise Exception
-                retval.append('')
+                sent = sent + 1
             except:
                 print("Unable to read file in __push_native: {0}".format(f))
                 continue
             # TODO....
 
-        return '\n'.join(retval)
+        return sent
 
     @staticmethod
     def __push(cmd_line,
@@ -421,9 +425,12 @@ class JobManager(object):
                     dcm_sent = JobManager.__push_native(cmd_line, dest)
                     native_success = True
                     break
-                except:
+                except Exception as err:
+                    print(err)
                     # TODO
                     pass
+                dcm_out = 'processed with native push'
+                dcm_err = ''
             else:
                 proc = subprocess.Popen(shlex.split(cmd_line.encode('ascii')),
                                         bufsize=4096,
@@ -439,13 +446,14 @@ class JobManager(object):
                 if proc.returncode == 0:
                     break  # success!
 
-            if 'Transient' in dcm_err:
-                print("Transient error. Will retry {0} {1} times."
-                      .format(dest, retries))
-                retries -= 1
-                sleep(5)
-                continue
-            elif hard_failure > 0:
+                if 'Transient' in dcm_err:
+                    print("Transient error. Will retry {0} {1} times."
+                          .format(dest, retries))
+                    retries -= 1
+                    sleep(5)
+                    continue
+
+            if hard_failure > 0:
                 with JobManager.PRINT_LOCK:
                     print(" +--- Experienced hard failure during push to {0}:"
                           .format(dest))
@@ -463,7 +471,8 @@ class JobManager(object):
             break
 
         # Check to see if everything worked
-        if native_success is False or proc.returncode != 0:
+        if native_success is False or \
+           native_success is None and proc.returncode != 0:
             with JobManager.PRINT_LOCK:
                 print(" +--- Error during DICOM send. Returned [{0}]"
                       .format(proc.returncode))
@@ -511,6 +520,10 @@ class JobManager(object):
                                        "Failed push: {aet}.".format(**dest()))
             if pushed != len(files):
                 raise JobManager.PushError("Did not push enough files!?")
+
+            if dest in ASSOCS:
+                ASSOCS[dest].release()
+                ASSOCS.pop(dest)
             return pushed
         except JobManager.PushError:
             # Propagate

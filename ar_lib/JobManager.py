@@ -932,7 +932,7 @@ class JobManager(object):
                     print('%d' % (s * 100 // sz), end='% ')
 
         try:
-            with open(local_path, 'r', buffering=0) as f:
+            with open(local_path, 'rb', buffering=0) as f:
                 # Get size for progress
                 f.seek(0, os.SEEK_END)
                 SIZE = f.tell()
@@ -950,7 +950,8 @@ class JobManager(object):
                 # on the far side for transfer.
                 xf = self.S.run("cat > '{0}'".format(rpath),
                                 stdin=subprocess.PIPE,
-                                bufsize=2*self.tx_size)
+                                bufsize=2*self.tx_size,
+                                universal_newlines=False)
 
                 while 1:
                     data = f_md5.read(self.tx_size)

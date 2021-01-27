@@ -46,6 +46,9 @@ from ar_lib.util import settle_file, run_cmd
 # import * as user-provided site-*.py functions need to be included
 from ar_lib.arsite import *
 
+if sys.version_info.major > 2:
+    from ar_lib.compat import execfile
+
 now = datetime.datetime.now
 pjoin = os.path.join
 
@@ -278,7 +281,7 @@ md5_sums = MGR.store_files(sendFiles, set_quiet=False)
 ########################################
 md5_name = "%d.md5" % EXAM
 
-md5_file = file(pjoin(WORK_DIR, md5_name), 'w')
+md5_file = open(pjoin(WORK_DIR, md5_name), 'w')
 for k in md5_sums:
     # This is the format expected by the 'md5sum' executable)
     md5_file.write("%s  %s\n" % (md5_sums[k], k))

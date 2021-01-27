@@ -44,7 +44,7 @@ from ar_lib.tee import Tee
 # run_cmd is imported to be available in conf.py executions.
 from ar_lib.util import settle_file, run_cmd
 # import * as user-provided site-*.py functions need to be included
-from ar_lib.site import *
+from ar_lib.arsite import *
 
 now = datetime.datetime.now
 pjoin = os.path.join

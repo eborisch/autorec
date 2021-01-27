@@ -36,9 +36,15 @@ import sys
 import tempfile
 import time
 
-from signal import SIGINT, SIGQUIT, SIGKILL
+if __name__ == "__main__":
+    # Hack around relative imports with a module file executable as script
+    updir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    sys.path.append(updir)
+    from ar_lib.arsite import COMPRESS, DECOMPRESS
+else:
+    from .arsite import COMPRESS, DECOMPRESS
 
-from .site import COMPRESS, DECOMPRESS
+from signal import SIGINT, SIGQUIT, SIGKILL
 
 DEBUG = os.environ.get('SSH_DEBUG', '0') != '0'
 
@@ -755,10 +761,10 @@ class SFTP():
 if __name__ == '__main__':
     # Ugly, but it works... otherwise 'site' is a standard package
     sys.path.insert(0, '..')
-    from ar_lib.site import *
+    from ar_lib.arsite import *
 
     if KEYFILE is None:
-        KEYFILE = '../id_recon'
+        KEYFILE = updir + '/id_recon'
 
     def _pstree():
         if not DEBUG:

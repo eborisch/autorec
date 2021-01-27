@@ -46,8 +46,6 @@ tokenName = None
 # for sending, and the values are a tuple of:
 # (relative remote name, copy to log dir (bool), delete after recon (bool))
 #
-# This line copies the p-file from the current exam (set in PFILE_N)
-# Modify and add others as needed.
 cpth = os.path.join(MOD_DIR, 'connectionTest')
 
 settle_file(os.path.join(cpth,'conf.py'))

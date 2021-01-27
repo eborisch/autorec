@@ -29,7 +29,7 @@ import os
 
 from ar_lib.JobManager import JobManager, GetFilesCallback
 # Import * as user-provided site-*.py functions / defs need to be included
-from ar_lib.site import *
+from ar_lib.arsite import *
 
 # Testing code
 if __name__ == "__main__":

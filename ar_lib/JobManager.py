@@ -45,7 +45,7 @@ from time import time, sleep
 from . import ssh
 from .dicom import DicomDest
 from .util import print_out, pretty_bytes, MD5Wrapper, flatten
-from .site import \
+from .arsite import \
         AE_TITLE, \
         CONTACT, \
         DEFAULT_RECON_MACHINES, \
@@ -243,7 +243,7 @@ class JobManager(object):
             return repr(self)
 
     def __init__(self,
-                 machines=DEFAULT_RECON_MACHINES, # Def in site.py / site-*.py
+                 machines=DEFAULT_RECON_MACHINES, # Def in arsite.py / site-*.py
                  user=USERNAME,
                  keyfile=None):
         """

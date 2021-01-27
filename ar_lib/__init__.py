@@ -20,4 +20,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = ('JobManager', 'dicom', 'site', 'ssh', 'tee', 'util')
+__all__ = ('JobManager', 'dicom', 'arsite', 'ssh', 'tee', 'util')

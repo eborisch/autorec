@@ -5,7 +5,7 @@ Installation:
  *  Copy this directory and its contents to the acquiring MRI system. We'll
     refer to the location as AR_PATH.
  *  Create AR_PATH/ar_lib/site-local.py (can be site-ANY.py). Set (at a minimum)
-    DEFAULT_RECON_MACHINES (tuple of ip addresses.) See AR_PATH/ar_lib/site.py
+    DEFAULT_RECON_MACHINES (tuple of ip addresses.) See AR_PATH/ar_lib/arsite.py
     for other variables that can be set.
  *  Create a pre-shared (passwordless) SSH key:
     ```

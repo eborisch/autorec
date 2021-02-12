@@ -31,6 +31,7 @@ put your customizations into site-*.py next to this one. (* = match any string)
 
 import os.path as _path
 from glob import glob as _glob
+from socket import gethostname as _gethostname
 
 from .dicom import DicomDest as _DCMDST
 
@@ -112,3 +113,10 @@ for _site_local in \
     sorted(_glob(_path.join(_path.dirname(__file__), 'site-*.py'))):
     with open(_site_local, 'r') as _site_conf:
         exec(compile(_site_conf.read(), _site_local, 'exec'))
+
+# Read <hostname>.py config last; local overrides.
+_hostname = _gethostname().split('.')[0]
+_local_site = _path.join(_path.dirname(__file__), '{0}.py'.format(_hostname))
+if _path.exists(_local_site):
+    with open(_local_site, 'r') as _site_conf:
+        exec(compile(_site_conf.read(), _local_site, 'exec'))

@@ -26,6 +26,7 @@
 from __future__ import print_function
 
 import datetime
+import traceback
 import os
 import shutil
 import socket
@@ -42,7 +43,7 @@ from ar_lib.JobManager import \
 from ar_lib.dicom import DicomDest
 from ar_lib.tee import Tee
 # run_cmd is imported to be available in conf.py executions.
-from ar_lib.util import settle_file, run_cmd
+from ar_lib.util import settle_file, run_cmd, get_fid
 # import * as user-provided site-*.py functions need to be included
 from ar_lib.arsite import *
 
@@ -198,6 +199,7 @@ except Exception as e:
         print("Unable to execute {0}. ".format(CONF_SCRIPT_NAME) +
               "Will likely fail soon.")
     print("Execution failed: [{0}]".format(e))
+    traceback.print_exc()
     # conf script failed; try to make sure we can save files at the minimum
     # Put into incoming/errored if jobsDir not yet set
     reconVars['jobsDir'] = reconVars.get('jobsDir', '/incoming/errored/')
@@ -235,7 +237,6 @@ for n in opt_value:
     if n in reconVars:
         opt_value[n] = reconVars[n]
 
-del reconVars
 
 #################################################################
 # (1) Check for stability and copy requested files into WORK_DIR #
@@ -243,7 +244,10 @@ del reconVars
 key_list = sendFiles.keys()  # Need a copy as we will be modifying
 for key in key_list:
     # Make sure file is at least 5s old. (i.e. not changing.)
-    if 'Runlog' not in key:
+    if get_fid(key) is not None:
+        if sendFiles[key][1] or sendFiles[key][2]:
+            print("Error: cannot copy or delete stream (fid) files!")
+    elif 'Runlog' not in key:
         settle_file(key, 5.0)
     # Copy files if requested OR if system is not connected
     if sendFiles[key][1] or MGR is None:
@@ -290,6 +294,8 @@ md5_file.close()
 MGR.store_file(pjoin(WORK_DIR, md5_name), md5_name)
 
 print("\nSubmission complete: %s\n" % now().ctime())
+
+del reconVars
 
 ###############
 # (4) Run Job #

@@ -26,8 +26,10 @@ Collection of generic support functions
 
 from __future__ import print_function
 
+import fcntl
 import hashlib
 import subprocess
+import re
 import sys
 
 from io import StringIO
@@ -134,6 +136,15 @@ def settle_file(file_path, age=5.0):
         print(" waited {0:.2g}s total.".format(time() - start_time))
 
 
+def get_fid(pathname):
+    if not re.match('^\d+$', pathname):
+        return None
+    fd = int(pathname)
+    try:
+        fcntl.fcntl(fd, fcntl.F_GETFL)
+        return fd
+    except OSError as err:
+        return None
 ## Classes
 
 class MD5Wrapper(object):

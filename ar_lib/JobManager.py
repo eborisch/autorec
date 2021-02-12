@@ -44,7 +44,7 @@ from time import time, sleep
 
 from . import ssh
 from .dicom import DicomDest
-from .util import print_out, pretty_bytes, MD5Wrapper, flatten
+from .util import print_out, pretty_bytes, MD5Wrapper, flatten, get_fid
 from .arsite import \
         AE_TITLE, \
         CONTACT, \
@@ -911,13 +911,21 @@ class JobManager(object):
         Sends the file at local_path to the remote server at remote_name
         """
         self.check_connected()
+        
+        fid = get_fid(local_path)
+        
+        if fid is None:
+            streaming = False
+        else:
+            local_path = '<streaming store>'
+            streaming = True
 
         def storeError(e):
             return self.SessionError("Unable to transfer local file [%s] "
                                      "as [%s] :: Error: [%s]" %
                                      (local_path, remote_name, str(e)))
 
-        if not os.path.exists(local_path):
+        if not streaming and not os.path.exists(local_path):
             raise storeError("Local file does not exist!")
 
         REPORT_SIZE = 128 * 2**20
@@ -932,14 +940,21 @@ class JobManager(object):
                     print('%d' % (s * 100 // sz), end='% ')
 
         try:
-            with open(local_path, 'rb', buffering=0) as f:
-                # Get size for progress
-                f.seek(0, os.SEEK_END)
-                SIZE = f.tell()
-                f.seek(0, os.SEEK_SET)
+            # Python 3 could just use open((int)), but 2.7 requires os.fdopen()
+            openfunc = open if not streaming else os.fdopen
+            with openfunc(local_path if not streaming else fid, 'rb', 0) as f:
+                if not streaming:
+                    # Get size for progress
+                    f.seek(0, os.SEEK_END)
+                    SIZE = f.tell()
+                    f.seek(0, os.SEEK_SET)
 
-                if SIZE >= REPORT_SIZE:
-                    print("Transfer progress [%s]: " % remote_name, end='')
+                    if SIZE >= REPORT_SIZE:
+                        print("Transfer progress [%s]: " % remote_name, end='')
+                else:
+                    print("Storing stream into [%s] ..." % remote_name)
+                    sys.stdout.flush()
+                    SIZE = 0
 
                 # Create checksum wrapper
                 f_md5 = MD5Wrapper(f)
@@ -960,6 +975,9 @@ class JobManager(object):
                     xf.stdin.write(data)
                     sent += len(data)
                     updateUser(sent, SIZE)
+
+                if streaming:
+                    SIZE = sent
 
                 xf.communicate()
                 if xf.returncode:
@@ -1016,9 +1034,9 @@ class JobManager(object):
         for key in sorted(files):
             try:
                 size += self.store_file(key,
-                                       files[key][0],
-                                       quiet=set_quiet,
-                                       md5Map=md5s)
+                                        files[key][0],
+                                        quiet=set_quiet,
+                                        md5Map=md5s)
                 count += 1
             except self.JobErrors as e:
                 print("Error storing file %s as %s; continuing.\n"

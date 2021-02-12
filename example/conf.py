@@ -14,14 +14,14 @@
 #    sendFiles  = Dictionary of files to send.
 #
 # OPTIONAL: [default when != None]
-#    getImg = Retrieve and import "img" directory [True]
-#    getMip = Retrieve and import "mip" directory [False]
-#    imgCopy = Additional directory to copy resulting image DICOMs into
-#    mipCopy = Additional directory to copy resulting MIP DICOMs into
-#    import = Perform local imports (overrides pushImport when False) [True]
-#    pushDests = DicomDest (or iterable of) object[s] of additional dests.
+#    getImg     = Retrieve and import "img" directory [True]
+#    getMip     = Retrieve and import "mip" directory [False]
+#    imgCopy    = Additional directory to copy resulting image DICOMs into
+#    mipCopy    = Additional directory to copy resulting MIP DICOMs into
+#    import     = Perform local imports (overrides pushImport when False) [True]
+#    pushDests  = DicomDest (or iterable of) object[s] of additional dests.
 #    pushImport = Perform a local push into scanner database [True]
-#    isolate = Remote reconstruction is configured in isolate mode [False]
+#    isolate    = Remote reconstruction is configured in isolate mode [False]
 ##########################################################################
 #
 # Some useful variables defined on entry by autorec:
@@ -59,6 +59,27 @@ tokenName = 'KEY'
 #
 # will copy '/tmp/info-file' into the remote work directory as 'info' and
 # delete the local (/tmp/info-file) on successful completion.
+#
+# An advanced usage allows you to stream the contents of an already opened file
+# descriptor (passed as a string numeric, like '3') to the remote file name.
+# This can be used to run a subprocess with the stdout rerouted to a file in
+# the remote work directory. For example:
+#
+#    import os
+#    import subprocess
+#
+#    (r, w) = pipe()
+#    proc = subprocess.Popen(['rsh', 'server', 'cat', fname],
+#                            stdout=os.fdopen(w, 'wb', 0),
+#                            stdin=open('/dev/null', 'rb'),
+#                            stderr=open('fetchlog.err', 'w'),
+#                            universal_newlines=False)
+#    sendFiles['{0}'.format(r)] = remote_file(fname.split('/')[-1])
+#
+# will execute (via rsh) 'cat' on 'server' of the path fname, with the output
+# placed into the file-part of fname in the remote destination directory
+# without staging on the local filesystem. Note in this usage BOTH _copy_ and
+# _delete_ args, if provided, must be false.
 #
 # This line copies the p-file from the current EXAM (set in PFILE_N) as
 # P_FILE_<EXAM>S<SERIES>_<YYYY_MM_DD>.7 in the destination job directory.

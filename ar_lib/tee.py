@@ -37,7 +37,7 @@ class Tee(object):
     succeed.
     """
     def __init__(self, name, mode='w'):
-        self.logfile = open(name, mode, buffering=0)  # Open logfile unbuffered
+        self.logfile = open(name, mode, buffering=1)  # Open line-buffered
         self.stdout = sys.stdout
         self.stderr = sys.stderr
         sys.stdout = self

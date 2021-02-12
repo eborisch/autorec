@@ -103,7 +103,8 @@ class SSH(object):
 
         # We start this with pipe input such that the remote cat doesn't exit
         self._master = self.run("echo Y; cat > /dev/null",
-                                stdin=subprocess.PIPE)
+                                stdin=subprocess.PIPE,
+                                universal_newlines=True)
         self._init = False  # We have launched our control master session
 
         res = self._master.stdout.read(1)
@@ -275,7 +276,7 @@ class SSH(object):
             kwargs['stdin'] = open('/dev/null', 'r')
 
         if 'stderr' not in kwargs:
-            efile = tempfile.TemporaryFile()
+            efile = tempfile.TemporaryFile('w+')
             kwargs['stderr'] = efile
         else:
             efile = None

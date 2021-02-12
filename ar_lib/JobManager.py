@@ -942,7 +942,7 @@ class JobManager(object):
         try:
             # Python 3 could just use open((int)), but 2.7 requires os.fdopen()
             openfunc = open if not streaming else os.fdopen
-            with openfunc(local_path if not streaming else fid, 'r', 0) as f:
+            with openfunc(local_path if not streaming else fid, 'rb', 0) as f:
                 if not streaming:
                     # Get size for progress
                     f.seek(0, os.SEEK_END)
@@ -965,7 +965,8 @@ class JobManager(object):
                 # on the far side for transfer.
                 xf = self.S.run("cat > '{0}'".format(rpath),
                                 stdin=subprocess.PIPE,
-                                bufsize=2*self.tx_size)
+                                bufsize=2*self.tx_size,
+                                universal_newlines=False)
 
                 while 1:
                     data = f_md5.read(self.tx_size)

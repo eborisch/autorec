@@ -47,7 +47,7 @@ from ar_lib.util import settle_file, run_cmd, get_fid
 # import * as user-provided site-*.py functions need to be included
 from ar_lib.arsite import *
 
-if sys.version_info.major > 2:
+if sys.version_info[0] > 2:
     from ar_lib.compat import execfile
 
 now = datetime.datetime.now

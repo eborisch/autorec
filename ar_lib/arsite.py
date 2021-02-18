@@ -115,7 +115,7 @@ for _site_local in \
         exec(compile(_site_conf.read(), _site_local, 'exec'))
 
 # Read <hostname>.py config last; local overrides.
-_hostname = _gethostname().split('.')[0]
+_hostname = _gethostname().split('.')[0].lower()
 _local_site = _path.join(_path.dirname(__file__), '{0}.py'.format(_hostname))
 if _path.exists(_local_site):
     with open(_local_site, 'r') as _site_conf:

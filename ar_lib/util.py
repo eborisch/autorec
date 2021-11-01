@@ -100,7 +100,7 @@ def run_cmd(cmd):
     Runs the external command cmd in a shell and prints the result.
     Raises an IOError exception if a non-zero exit code is detected.
     """
-    print("Exectuting command [{0}]".format(cmd))
+    print("Executing command [{0}]".format(cmd))
     sub_cmd = subprocess.Popen(cmd,
                                bufsize=4096,
                                close_fds=True,

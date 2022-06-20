@@ -43,7 +43,9 @@ class DicomDest(object):
         """
         Performs checking of attribute names for allowed ones.
         """
-        if attr in ('aet', 'ip', 'port'):
+        if attr == 'port':
+            self.__dict__[attr] = int(value)
+        elif attr in ('aet', 'ip'):
             self.__dict__[attr] = value
         else:
             raise AttributeError(attr + ' not allowed')

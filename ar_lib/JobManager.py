@@ -512,6 +512,9 @@ class JobManager(object):
                 jobs = []
                 tStart = time()
                 for n in range(len(dests)):
+                    if not hasattr(dests[n], 'port') or dests[n].port > 65535:
+                        print("Invalid dest: {0}; skipping!".format(dests[n]))
+                        continue
                     lbl = '{0:02d}:{1}'.format(n, dests[n].aet)
                     jobs.append(push_thread(dests[n], lbl))
                     # Lets us exit without finishing if there is a timeout

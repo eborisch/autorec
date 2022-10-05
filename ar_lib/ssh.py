@@ -82,7 +82,7 @@ class SSH(object):
         Initialize session. Raises IOError if unable to connect.
 
         arguments:
-         hostname: Remote host
+         hostname: Remote host (or user@host, overriding username)
          username: Remote user
          key: path to SSH key file
          executable: SSH executable to call
@@ -90,8 +90,11 @@ class SSH(object):
                      String:     use as config file
                      Otherwise:  use normal ~/.ssh/config
         """
-        self._hostname = hostname
-        self._username = username
+        if '@' in hostname:
+            [self._username, self._hostname] = hostname.split('@')
+        else:
+            self._hostname = hostname
+            self._username = username
         self._key = key
         self._exe = executable
         self._init = True
